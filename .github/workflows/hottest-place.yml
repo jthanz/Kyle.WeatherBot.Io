@@ -1,0 +1,39 @@
+# Save this at: .github/workflows/hottest-place.yml
+# Runs the hottest-place script once a day and persists state.json between runs.
+
+name: Hottest place on Earth
+
+on:
+  schedule:
+    # UTC. 14:00 UTC ~= 9:00 AM Austin (CDT). GitHub cron ignores DST.
+    - cron: "0 14 * * *"
+  workflow_dispatch: {}   # manual "Run workflow" button for testing
+
+permissions:
+  contents: write          # needed to commit state.json back
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - run: python hottest_today.py
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_USER_ID: ${{ secrets.DISCORD_USER_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Persist dedup state
+        run: |
+          git config user.name "hottest-bot"
+          git config user.email "hottest-bot@users.noreply.github.com"
+          git add state.json
+          git commit -m "Update state [skip ci]" || echo "no changes to commit"
+          git push
