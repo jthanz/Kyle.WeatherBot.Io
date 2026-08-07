@@ -1,5 +1,6 @@
 # Save this at: .github/workflows/hottest-place.yml
-# Runs the hottest-place script once a day and persists state.json between runs.
+# Runs the hottest-place script once a day. No state is saved between runs,
+# so it does not track or avoid repeat celebrities.
 
 name: Hottest place on Earth
 
