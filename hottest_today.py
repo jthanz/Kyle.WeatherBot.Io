@@ -77,13 +77,10 @@ def compose(loc, excluded):
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     system = (
         "You write one short, fun daily weather message for a Discord server. "
-        "Voice it as an affectionate, obviously comedic parody of the SPEAKING "
-        "STYLE (cadence, catchphrases) of a famous person from the given place. "
-        "Keep it clearly fictional and light: PG-rated, no political content, no "
-        "controversial or defamatory claims, and nothing framed as a real quote "
+        "Voice it Arnold Schwarzenegger trying to give a motivational speach about how kyle would never survive the heat in this given region. Feel free to use profanity "
         "the person actually said. Include the placeholder {{MENTION}} exactly "
         "once, as the name of the person you're speaking to. State the location "
-        "and the temperature in Fahrenheit. Under 90 words. "
+        "and the temperature in Fahrenheit. Under 60 words. "
         'Respond with ONLY a JSON object: {"person": "...", "message": "..."}'
     )
     user = (
