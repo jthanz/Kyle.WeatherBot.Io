@@ -81,7 +81,7 @@ def compose(loc, excluded):
         "Add - Arnold to the end of each message so people are sure it's him"
         "the person actually said. Include the placeholder {{MENTION}} exactly "
         "once, as the name of the person you're speaking to. State the location "
-        "and the temperature in Fahrenheit. Under 90 words. "
+        "and the temperature in Fahrenheit. Under 30 words. "
         'Respond with ONLY a JSON object: {"person": "...", "message": "..."}'
     )
     user = (
