@@ -2,14 +2,13 @@
 """
 Once a day: find the hottest place on Earth (from a curated candidate list),
 write a short message in the voice of a famous person from that state/country,
-tag a specific server member, and post it to a Discord channel.
+address it to Kyle, and post it to a Discord channel.
 
 If the hottest place is the same as the previous run, a different famous
 person is used (tracked in state.json).
 
 Environment variables:
   DISCORD_WEBHOOK_URL  - webhook URL for the target channel
-  DISCORD_USER_ID      - numeric ID of the member to tag (Copy User ID in Discord)
   ANTHROPIC_API_KEY    - your Anthropic API key
   WEATHER_API_KEY      - your free WeatherAPI.com key
   STATE_FILE           - optional, defaults to state.json
@@ -25,6 +24,7 @@ from hot_locations import HOT_LOCATIONS
 
 MODEL = "claude-sonnet-5"          # good at voice/parody; swap if needed
 STATE_FILE = os.environ.get("STATE_FILE", "state.json")
+RECIPIENT = "Kyle"                 # the name the message is addressed to
 
 
 # --- Temperature data (WeatherAPI.com: free key, cloud-friendly, returns F) --
@@ -82,8 +82,8 @@ def compose(loc, excluded):
         "Keep it clearly fictional and light: PG-rated, no political content, no "
         "controversial or defamatory claims, and nothing framed as a real quote "
         "the person actually said. Include the placeholder {{MENTION}} exactly "
-        "once, addressing the tagged user. State the location and the temperature "
-        "in Fahrenheit. Under 90 words. "
+        "once, as the name of the person you're speaking to. State the location "
+        "and the temperature in Fahrenheit. Under 90 words. "
         'Respond with ONLY a JSON object: {"person": "...", "message": "..."}'
     )
     user = (
@@ -108,7 +108,6 @@ def compose(loc, excluded):
 
 def main():
     webhook = os.environ["DISCORD_WEBHOOK_URL"]
-    user_id = str(os.environ["DISCORD_USER_ID"])
 
     loc = hottest_location()
     if not loc:
@@ -121,14 +120,13 @@ def main():
 
     result = compose(loc, excluded)
     person = result["person"]
-    message = result["message"].replace("{{MENTION}}", f"<@{user_id}>")
-    if f"<@{user_id}>" not in message:
-        message = f"<@{user_id}> {message}"
+    message = result["message"].replace("{{MENTION}}", RECIPIENT)
+    if RECIPIENT not in message:
+        message = f"{RECIPIENT}, {message}"
 
     resp = requests.post(
         webhook,
-        json={"content": message[:2000],
-              "allowed_mentions": {"users": [user_id]}},
+        json={"content": message[:2000]},
         timeout=30,
     )
     resp.raise_for_status()
