@@ -11,6 +11,7 @@ Environment variables:
   DISCORD_WEBHOOK_URL  - webhook URL for the target channel
   DISCORD_USER_ID      - numeric ID of the member to tag (Copy User ID in Discord)
   ANTHROPIC_API_KEY    - your Anthropic API key
+  WEATHER_API_KEY      - your free WeatherAPI.com key
   STATE_FILE           - optional, defaults to state.json
 """
 
@@ -26,23 +27,20 @@ MODEL = "claude-sonnet-5"          # good at voice/parody; swap if needed
 STATE_FILE = os.environ.get("STATE_FILE", "state.json")
 
 
-# --- Temperature data (Open-Meteo, free, no key, returns F directly) --------
+# --- Temperature data (WeatherAPI.com: free key, cloud-friendly, returns F) --
 def daily_max_f(lat: float, lon: float):
     r = requests.get(
-        "https://api.open-meteo.com/v1/forecast",
+        "https://api.weatherapi.com/v1/forecast.json",
         params={
-            "latitude": lat,
-            "longitude": lon,
-            "daily": "temperature_2m_max",
-            "temperature_unit": "fahrenheit",
-            "timezone": "auto",
-            "forecast_days": 1,
+            "key": os.environ["WEATHER_API_KEY"],
+            "q": f"{lat},{lon}",
+            "days": 1,
         },
         timeout=30,
     )
     r.raise_for_status()
-    highs = r.json().get("daily", {}).get("temperature_2m_max", [])
-    return highs[0] if highs else None
+    days = r.json().get("forecast", {}).get("forecastday", [])
+    return days[0]["day"]["maxtemp_f"] if days else None
 
 
 def hottest_location():
